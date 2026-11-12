@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Birth Moon Phase Calculator</title>
+  <title>Birth Moon Phase & Sign Calculator</title>
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body {
@@ -20,14 +20,17 @@
       background: #1e293b;
       padding: 2rem;
       border-radius: 16px;
-      max-width: 450px;
+      max-width: 500px;
       width: 100%;
       text-align: center;
       box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
     h1 { margin-top: 0; font-size: 1.6rem; color: #e2e8f0; }
     p.subtitle { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; }
-    input[type="date"] {
+    .input-group { display: flex; gap: 10px; margin-bottom: 1rem; }
+    .input-box { flex: 1; text-align: left; }
+    label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
+    input[type="date"], input[type="time"] {
       width: 100%;
       padding: 12px;
       font-size: 1rem;
@@ -35,9 +38,8 @@
       border: 1px solid #334155;
       background: #0f172a;
       color: #fff;
-      margin-bottom: 1rem;
     }
-    button {
+    button.primary {
       width: 100%;
       padding: 12px;
       font-size: 1rem;
@@ -48,112 +50,163 @@
       color: white;
       cursor: pointer;
     }
-    button:hover { background: #4f46e5; }
+    button.primary:hover { background: #4f46e5; }
     .result {
       margin-top: 1.5rem;
       padding-top: 1.5rem;
       border-top: 1px solid #334155;
       display: none;
     }
-    .moon-icon { font-size: 4rem; margin: 0.5rem 0; }
-    .phase-title { font-size: 1.4rem; font-weight: bold; color: #a5b4fc; margin: 0.25rem 0; }
-    .archetype { font-size: 0.95rem; color: #cbd5e1; font-style: italic; margin-bottom: 0.75rem; }
-    .description { font-size: 0.95rem; line-height: 1.5; color: #e2e8f0; }
+    .result-section {
+      background: #0f172a;
+      padding: 1.25rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid #334155;
+    }
+    .icon { font-size: 3rem; margin: 0.25rem 0; }
+    .title { font-size: 1.3rem; font-weight: bold; color: #a5b4fc; margin: 0.25rem 0; }
+    .tag { font-size: 0.9rem; color: #cbd5e1; font-style: italic; margin-bottom: 0.6rem; }
+    .description { font-size: 0.92rem; line-height: 1.5; color: #e2e8f0; margin: 0; }
+    .combo-box {
+      background: #312e81;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: #e0e7ff;
+      margin-bottom: 1rem;
+    }
+    button.secondary {
+      background: transparent;
+      border: 1px solid #6366f1;
+      color: #a5b4fc;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button.secondary:hover { background: rgba(99, 102, 241, 0.15); }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h1>Birth Moon Phase Calculator</h1>
-  <p class="subtitle">Enter your birthday to discover your lunar archetype.</p>
+  <h1>Birth Moon Calculator</h1>
+  <p class="subtitle">Discover your lunar phase archetype and emotional Moon sign.</p>
   
-  <input type="date" id="bday" required>
-  <button onclick="calculateMoonPhase()">Find My Moon Phase</button>
+  <div class="input-group">
+    <div class="input-box">
+      <label for="bday">Birth Date *</label>
+      <input type="date" id="bday" required>
+    </div>
+    <div class="input-box">
+      <label for="btime">Birth Time (Optional)</label>
+      <input type="time" id="btime" value="12:00">
+    </div>
+  </div>
+
+  <button class="primary" onclick="calculateMoon()">Reveal My Moon Profile</button>
 
   <div class="result" id="result">
-    <div class="moon-icon" id="moonIcon"></div>
-    <div class="phase-title" id="phaseTitle"></div>
-    <div class="archetype" id="archetype"></div>
-    <p class="description" id="description"></p>
+    <div class="result-section">
+      <div class="icon" id="moonIcon"></div>
+      <div class="title" id="phaseTitle"></div>
+      <div class="tag" id="archetype"></div>
+      <p class="description" id="phaseDesc"></p>
+    </div>
+
+    <div class="result-section">
+      <div class="icon" id="signIcon"></div>
+      <div class="title" id="signTitle"></div>
+      <div class="tag" id="signElement"></div>
+      <p class="description" id="signDesc"></p>
+    </div>
+
+    <div class="combo-box" id="comboSummary"></div>
+    <button class="secondary" onclick="copyResult()" id="copyBtn">Copy My Results</button>
   </div>
 </div>
 
 <script>
   const phases = [
-    {
-      name: "New Moon",
-      icon: "🌑",
-      archetype: "The Pathfinder",
-      desc: "Independent, innovative, and driven to initiate fresh chapters. You thrive on new beginnings and trust your gut instincts."
-    },
-    {
-      name: "Waxing Crescent",
-      icon: "🌒",
-      archetype: "The Seeker",
-      desc: "Curious, optimistic, and full of potential. You excel at gathering ideas and pushing past early doubts to build momentum."
-    },
-    {
-      name: "First Quarter",
-      icon: "🌓",
-      archetype: "The Builder",
-      desc: "Action-oriented, decisive, and resilient. You do your best work when overcoming obstacles and turning ideas into reality."
-    },
-    {
-      name: "Waxing Gibbous",
-      icon: "🌔",
-      archetype: "The Refiner",
-      desc: "Analytical, dedicated, and growth-minded. You love improving systems, polishing details, and preparing for big breakthroughs."
-    },
-    {
-      name: "Full Moon",
-      icon: "🌕",
-      archetype: "The Transformer",
-      desc: "Expressive, magnetic, and deeply intuitive. You seek balance in relationships and often bring hidden truths into the light."
-    },
-    {
-      name: "Waning Gibbous",
-      icon: "🌖",
-      archetype: "The Mentor",
-      desc: "Generous, wise, and community-focused. You feel most fulfilled when sharing your life lessons and insights with others."
-    },
-    {
-      name: "Third Quarter",
-      icon: "🌗",
-      archetype: "The Releaser",
-      desc: "Reflective, adaptable, and forward-looking. Your strength lies in letting go of what no longer works to make room for the new."
-    },
-    {
-      name: "Balsamic Moon",
-      icon: "🌘",
-      archetype: "The Healer",
-      desc: "Empathetic, imaginative, and deeply perceptive. You are an old soul who naturally brings closure to cycles and senses future trends."
-    }
+    { name: "New Moon", icon: "🌑", archetype: "The Pathfinder", summary: "initiate fresh chapters", desc: "Independent, innovative, and driven to start new projects. You thrive on fresh beginnings and trust your gut instincts." },
+    { name: "Waxing Crescent", icon: "🌒", archetype: "The Seeker", summary: "build momentum through curiosity", desc: "Curious, optimistic, and full of potential. You excel at gathering ideas and pushing past early doubts." },
+    { name: "First Quarter", icon: "🌓", archetype: "The Builder", summary: "take decisive action", desc: "Action-oriented, decisive, and resilient. You do your best work when overcoming obstacles and turning ideas into reality." },
+    { name: "Waxing Gibbous", icon: "🌔", archetype: "The Refiner", summary: "perfect and analyze details", desc: "Analytical, dedicated, and growth-minded. You love improving systems, polishing details, and preparing for big breakthroughs." },
+    { name: "Full Moon", icon: "🌕", archetype: "The Transformer", summary: "seek balance and clarity", desc: "Expressive, magnetic, and deeply intuitive. You seek balance in relationships and often bring hidden truths into the light." },
+    { name: "Waning Gibbous", icon: "🌖", archetype: "The Mentor", summary: "share wisdom with others", desc: "Generous, wise, and community-focused. You feel most fulfilled when sharing your life lessons and insights with others." },
+    { name: "Third Quarter", icon: "🌗", archetype: "The Releaser", summary: "let go and reorient", desc: "Reflective, adaptable, and forward-looking. Your strength lies in letting go of what no longer works to make room for the new." },
+    { name: "Balsamic Moon", icon: "🌘", archetype: "The Healer", summary: "bring closure and intuit the future", desc: "Empathetic, imaginative, and deeply perceptive. You are an old soul who naturally wraps up cycles and senses future trends." }
   ];
 
-  function calculateMoonPhase() {
-    const input = document.getElementById("bday").value;
-    if (!input) return;
+  const signs = [
+    { name: "Aries Moon", icon: "♈", element: "Fire Sign • Instinctual & Direct", need: "independence and movement", desc: "You process emotions quickly and honestly. You feel best when you have independence, physical movement, and freedom to act." },
+    { name: "Taurus Moon", icon: "♉", element: "Earth Sign • Grounded & Steady", need: "stability and comfort", desc: "You seek stability, sensory comfort, and calm. You feel safest with predictable routines, good food, and peaceful surroundings." },
+    { name: "Gemini Moon", icon: "♊", element: "Air Sign • Curious & Expressive", need: "mental stimulation and dialogue", desc: "You process feelings through talking, writing, and analyzing. You need mental variety and open conversation to feel balanced." },
+    { name: "Cancer Moon", icon: "♋", element: "Water Sign • Nurturing & Intuitive", need: "emotional safety and home", desc: "Deeply empathetic, protective, and intuitive. You feel most secure when nurturing loved ones and tending to your home sanctuary." },
+    { name: "Leo Moon", icon: "♌", element: "Fire Sign • Warm & Heartfelt", need: "creative expression and warmth", desc: "Warm, expressive, and fiercely loyal. You need creative outlets, appreciation, and heartfelt connection to feel emotionally fulfilled." },
+    { name: "Virgo Moon", icon: "♍", element: "Earth Sign • Practical & Thoughtful", need: "order and usefulness", desc: "You show care through practical help and problem-solving. You feel calmest when life is orderly and daily routines flow smoothly." },
+    { name: "Libra Moon", icon: "♎", element: "Air Sign • Harmonious & Relational", need: "harmony and partnership", desc: "You crave harmony, fairness, and beauty. You process emotions best through balanced dialogue and peaceful environments." },
+    { name: "Scorpio Moon", icon: "♏", element: "Water Sign • Deep & Transformative", need: "deep trust and privacy", desc: "You experience emotions deeply and intensely. You value loyalty, privacy, and transformative, soul-level connections." },
+    { name: "Sagittarius Moon", icon: "♐", element: "Fire Sign • Optimistic & Free-Spirited", need: "freedom and exploration", desc: "Optimistic, adventurous, and freedom-loving. You need space to explore, learn, and find meaning when processing stress." },
+    { name: "Capricorn Moon", icon: "♑", element: "Earth Sign • Resilient & Composed", need: "clear boundaries and structure", desc: "Grounded, resilient, and self-reliant. You feel most secure when setting clear boundaries and working toward long-term goals." },
+    { name: "Aquarius Moon", icon: "♒", element: "Air Sign • Independent & Observant", need: "intellectual freedom", desc: "Observant, independent, and community-minded. You need intellectual freedom and objective perspective when navigating heavy feelings." },
+    { name: "Pisces Moon", icon: "♓", element: "Water Sign • Gentle & Imaginative", need: "quiet time and creative rest", desc: "Gentle, imaginative, and highly sensitive to the moods of others. You need quiet time, music, or creative rest to recharge." }
+  ];
 
-    const [year, month, day] = input.split("-").map(Number);
-    const targetDate = Date.UTC(year, month - 1, day, 12, 0, 0);
-    
-    // Known New Moon reference: January 6, 2000 at 18:14 UTC
+    function calculateMoon() {
+    const dateVal = document.getElementById("bday").value;
+    if (!dateVal) return;
+
+    const timeVal = document.getElementById("btime").value || "12:00";
+    const [year, month, day] = dateVal.split("-").map(Number);
+    const [hour, minute] = timeVal.split(":").map(Number);
+
+    const targetUTC = Date.UTC(year, month - 1, day, hour, minute, 0);
+    const jd = (targetUTC / 86400000) + 2440587.5;
+    const d = jd - 2451545.0;
+
     const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14, 0);
-    const synodicMonth = 29.530588853; // Average length of lunar cycle in days
-    
-    const daysSinceNew = (targetDate - knownNewMoon) / 86400000;
+    const synodicMonth = 29.530588853;
+    const daysSinceNew = (targetUTC - knownNewMoon) / 86400000;
     let cycleFraction = (daysSinceNew / synodicMonth) % 1;
     if (cycleFraction < 0) cycleFraction += 1;
+    const phaseIndex = Math.floor((cycleFraction * 8) + 0.5) % 8;
+    const phase = phases[phaseIndex];
 
-    // Map cycle fraction (0 to 1) to one of the 8 phases
-    const index = Math.floor((cycleFraction * 8) + 0.5) % 8;
-    const phase = phases[index];
+    const rad = Math.PI / 180;
+    const L = (218.316 + 13.176396 * d) % 360;
+    const M = (134.963 + 13.064993 * d) % 360;
+    const F = (93.272 + 13.229350 * d) % 360;
+    let lon = L + 6.289 * Math.sin(M * rad) - 1.274 * Math.sin((M - 2 * F) * rad) + 0.658 * Math.sin(2 * F * rad);
+    lon = ((lon % 360) + 360) % 360;
+    const signIndex = Math.floor(lon / 30);
+    const sign = signs[signIndex];
 
     document.getElementById("moonIcon").textContent = phase.icon;
     document.getElementById("phaseTitle").textContent = phase.name;
     document.getElementById("archetype").textContent = phase.archetype;
-    document.getElementById("description").textContent = phase.desc;
+    document.getElementById("phaseDesc").textContent = phase.desc;
+
+    document.getElementById("signIcon").textContent = sign.icon;
+    document.getElementById("signTitle").textContent = sign.name;
+    document.getElementById("signElement").textContent = sign.element;
+    document.getElementById("signDesc").textContent = sign.desc;
+
+    document.getElementById("comboSummary").innerHTML = 
+      `<strong>Your Lunar Blend:</strong> As a <strong>${phase.archetype}</strong> (${phase.name}) with a <strong>${sign.name}</strong>, you naturally <em>${phase.summary}</em> while needing <em>${sign.need}</em> to feel grounded.`;
+
     document.getElementById("result").style.display = "block";
+    document.getElementById("copyBtn").textContent = "Copy My Results";
+  }
+
+  function copyResult() {
+    const phase = document.getElementById("phaseTitle").textContent;
+    const arch = document.getElementById("archetype").textContent;
+    const sign = document.getElementById("signTitle").textContent;
+    const text = `My Birth Moon Profile: ${phase} (${arch}) & ${sign}!`;
+    navigator.clipboard.writeText(text);
+    document.getElementById("copyBtn").textContent = "Copied to Clipboard!";
   }
 </script>
 
