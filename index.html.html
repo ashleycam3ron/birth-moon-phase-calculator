@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birth Moon Phase Calculator</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 450px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    h1 { margin-top: 0; font-size: 1.6rem; color: #e2e8f0; }
+    p.subtitle { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; }
+    input[type="date"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      background: #6366f1;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background: #4f46e5; }
+    .result {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #334155;
+      display: none;
+    }
+    .moon-icon { font-size: 4rem; margin: 0.5rem 0; }
+    .phase-title { font-size: 1.4rem; font-weight: bold; color: #a5b4fc; margin: 0.25rem 0; }
+    .archetype { font-size: 0.95rem; color: #cbd5e1; font-style: italic; margin-bottom: 0.75rem; }
+    .description { font-size: 0.95rem; line-height: 1.5; color: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Birth Moon Phase Calculator</h1>
+  <p class="subtitle">Enter your birthday to discover your lunar archetype.</p>
+  
+  <input type="date" id="bday" required>
+  <button onclick="calculateMoonPhase()">Find My Moon Phase</button>
+
+  <div class="result" id="result">
+    <div class="moon-icon" id="moonIcon"></div>
+    <div class="phase-title" id="phaseTitle"></div>
+    <div class="archetype" id="archetype"></div>
+    <p class="description" id="description"></p>
+  </div>
+</div>
+
+<script>
+  const phases = [
+    {
+      name: "New Moon",
+      icon: "🌑",
+      archetype: "The Pathfinder",
+      desc: "Independent, innovative, and driven to initiate fresh chapters. You thrive on new beginnings and trust your gut instincts."
+    },
+    {
+      name: "Waxing Crescent",
+      icon: "🌒",
+      archetype: "The Seeker",
+      desc: "Curious, optimistic, and full of potential. You excel at gathering ideas and pushing past early doubts to build momentum."
+    },
+    {
+      name: "First Quarter",
+      icon: "🌓",
+      archetype: "The Builder",
+      desc: "Action-oriented, decisive, and resilient. You do your best work when overcoming obstacles and turning ideas into reality."
+    },
+    {
+      name: "Waxing Gibbous",
+      icon: "🌔",
+      archetype: "The Refiner",
+      desc: "Analytical, dedicated, and growth-minded. You love improving systems, polishing details, and preparing for big breakthroughs."
+    },
+    {
+      name: "Full Moon",
+      icon: "🌕",
+      archetype: "The Transformer",
+      desc: "Expressive, magnetic, and deeply intuitive. You seek balance in relationships and often bring hidden truths into the light."
+    },
+    {
+      name: "Waning Gibbous",
+      icon: "🌖",
+      archetype: "The Mentor",
+      desc: "Generous, wise, and community-focused. You feel most fulfilled when sharing your life lessons and insights with others."
+    },
+    {
+      name: "Third Quarter",
+      icon: "🌗",
+      archetype: "The Releaser",
+      desc: "Reflective, adaptable, and forward-looking. Your strength lies in letting go of what no longer works to make room for the new."
+    },
+    {
+      name: "Balsamic Moon",
+      icon: "🌘",
+      archetype: "The Healer",
+      desc: "Empathetic, imaginative, and deeply perceptive. You are an old soul who naturally brings closure to cycles and senses future trends."
+    }
+  ];
+
+  function calculateMoonPhase() {
+    const input = document.getElementById("bday").value;
+    if (!input) return;
+
+    const [year, month, day] = input.split("-").map(Number);
+    const targetDate = Date.UTC(year, month - 1, day, 12, 0, 0);
+    
+    // Known New Moon reference: January 6, 2000 at 18:14 UTC
+    const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14, 0);
+    const synodicMonth = 29.530588853; // Average length of lunar cycle in days
+    
+    const daysSinceNew = (targetDate - knownNewMoon) / 86400000;
+    let cycleFraction = (daysSinceNew / synodicMonth) % 1;
+    if (cycleFraction < 0) cycleFraction += 1;
+
+    // Map cycle fraction (0 to 1) to one of the 8 phases
+    const index = Math.floor((cycleFraction * 8) + 0.5) % 8;
+    const phase = phases[index];
+
+    document.getElementById("moonIcon").textContent = phase.icon;
+    document.getElementById("phaseTitle").textContent = phase.name;
+    document.getElementById("archetype").textContent = phase.archetype;
+    document.getElementById("description").textContent = phase.desc;
+    document.getElementById("result").style.display = "block";
+  }
+</script>
+
+</body>
+</html>
