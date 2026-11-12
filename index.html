@@ -20,13 +20,13 @@
       background: #1e293b;
       padding: 2rem;
       border-radius: 16px;
-      max-width: 500px;
+      max-width: 560px;
       width: 100%;
       text-align: center;
       box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
-    h1 { margin-top: 0; font-size: 1.6rem; color: #e2e8f0; }
-    p.subtitle { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; }
+    h1 { margin-top: 0; font-size: 1.65rem; color: #e2e8f0; }
+    p.subtitle { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.4; }
     .input-group { display: flex; gap: 10px; margin-bottom: 1rem; }
     .input-box { flex: 1; text-align: left; }
     label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
@@ -38,10 +38,11 @@
       border: 1px solid #334155;
       background: #0f172a;
       color: #fff;
+      color-scheme: dark;
     }
     button.primary {
       width: 100%;
-      padding: 12px;
+      padding: 13px;
       font-size: 1rem;
       font-weight: 600;
       border: none;
@@ -56,31 +57,49 @@
       padding-top: 1.5rem;
       border-top: 1px solid #334155;
       display: none;
+      text-align: left;
     }
     .result-section {
       background: #0f172a;
-      padding: 1.25rem;
+      padding: 1.4rem;
       border-radius: 12px;
       margin-bottom: 1rem;
       border: 1px solid #334155;
     }
-    .icon { font-size: 3rem; margin: 0.25rem 0; }
-    .title { font-size: 1.3rem; font-weight: bold; color: #a5b4fc; margin: 0.25rem 0; }
-    .tag { font-size: 0.9rem; color: #cbd5e1; font-style: italic; margin-bottom: 0.6rem; }
-    .description { font-size: 0.92rem; line-height: 1.5; color: #e2e8f0; margin: 0; }
+    .section-header {
+      text-align: center;
+      margin-bottom: 0.85rem;
+    }
+    .icon { font-size: 3rem; margin-bottom: 0.25rem; }
+    .title { font-size: 1.35rem; font-weight: bold; color: #a5b4fc; margin: 0.15rem 0; }
+    .degree-badge {
+      display: inline-block;
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin: 4px 0;
+      border: 1px solid #334155;
+    }
+    .tag { font-size: 0.88rem; color: #cbd5e1; font-style: italic; margin-top: 4px; }
+    .description { font-size: 0.94rem; line-height: 1.6; color: #e2e8f0; margin: 0;text-align: center;}
     .combo-box {
       background: #312e81;
-      padding: 1rem;
+      padding: 1.1rem;
       border-radius: 10px;
-      font-size: 0.95rem;
+      font-size: 0.94rem;
+      line-height: 1.5;
       color: #e0e7ff;
       margin-bottom: 1rem;
+      text-align: center;
     }
+    .btn-wrap { text-align: center; }
     button.secondary {
       background: transparent;
       border: 1px solid #6366f1;
       color: #a5b4fc;
-      padding: 8px 16px;
+      padding: 9px 18px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.9rem;
@@ -92,7 +111,7 @@
 
 <div class="card">
   <h1>Birth Moon Calculator</h1>
-  <p class="subtitle">Discover your lunar phase archetype and emotional Moon sign.</p>
+  <p class="subtitle">Discover your lunar phase archetype, Moon phase degree, and emotional Moon sign.</p>
   
   <div class="input-group">
     <div class="input-box">
@@ -109,52 +128,179 @@
 
   <div class="result" id="result">
     <div class="result-section">
-      <div class="icon" id="moonIcon"></div>
-      <div class="title" id="phaseTitle"></div>
-      <div class="tag" id="archetype"></div>
+      <div class="section-header">
+        <div class="icon" id="moonIcon"></div>
+        <div class="title" id="phaseTitle"></div>
+        <div class="degree-badge" id="phaseDegree"></div>
+        <div class="tag" id="archetype"></div>
+      </div>
       <p class="description" id="phaseDesc"></p>
     </div>
 
     <div class="result-section">
-      <div class="icon" id="signIcon"></div>
-      <div class="title" id="signTitle"></div>
-      <div class="tag" id="signElement"></div>
+      <div class="section-header">
+        <div class="icon" id="signIcon"></div>
+        <div class="title" id="signTitle"></div>
+        <div class="tag" id="signElement"></div>
+      </div>
       <p class="description" id="signDesc"></p>
     </div>
 
     <div class="combo-box" id="comboSummary"></div>
-    <button class="secondary" onclick="copyResult()" id="copyBtn">Copy My Results</button>
+    <div class="btn-wrap">
+      <button class="secondary" onclick="copyResult()" id="copyBtn">Copy My Results</button>
+    </div>
   </div>
 </div>
 
 <script>
   const phases = [
-    { name: "New Moon", icon: "🌑", archetype: "The Pathfinder", summary: "initiate fresh chapters", desc: "Independent, innovative, and driven to start new projects. You thrive on fresh beginnings and trust your gut instincts." },
-    { name: "Waxing Crescent", icon: "🌒", archetype: "The Seeker", summary: "build momentum through curiosity", desc: "Curious, optimistic, and full of potential. You excel at gathering ideas and pushing past early doubts." },
-    { name: "First Quarter", icon: "🌓", archetype: "The Builder", summary: "take decisive action", desc: "Action-oriented, decisive, and resilient. You do your best work when overcoming obstacles and turning ideas into reality." },
-    { name: "Waxing Gibbous", icon: "🌔", archetype: "The Refiner", summary: "perfect and analyze details", desc: "Analytical, dedicated, and growth-minded. You love improving systems, polishing details, and preparing for big breakthroughs." },
-    { name: "Full Moon", icon: "🌕", archetype: "The Transformer", summary: "seek balance and clarity", desc: "Expressive, magnetic, and deeply intuitive. You seek balance in relationships and often bring hidden truths into the light." },
-    { name: "Waning Gibbous", icon: "🌖", archetype: "The Mentor", summary: "share wisdom with others", desc: "Generous, wise, and community-focused. You feel most fulfilled when sharing your life lessons and insights with others." },
-    { name: "Third Quarter", icon: "🌗", archetype: "The Releaser", summary: "let go and reorient", desc: "Reflective, adaptable, and forward-looking. Your strength lies in letting go of what no longer works to make room for the new." },
-    { name: "Balsamic Moon", icon: "🌘", archetype: "The Healer", summary: "bring closure and intuit the future", desc: "Empathetic, imaginative, and deeply perceptive. You are an old soul who naturally wraps up cycles and senses future trends." }
+    {
+      name: "New Moon",
+      icon: "🌑",
+      archetype: "The Pathfinder • Initiation, Instinct, Potential, Fresh Starts",
+      summary: "initiate fresh chapters through instinct",
+      desc: "The New Moon marks the seed moment of the lunar cycle, when the sky is dark and life is felt rather than seen. People born under this phase operate strongly on gut instinct, spontaneity, and raw creative impulse. You are here to initiate new experiences and project your personal vision into the world without waiting for a roadmap. Because you are constantly starting fresh chapters, your growth comes from trusting your intuition while learning to stay present with what you begin."
+    },
+    {
+      name: "Waxing Crescent",
+      icon: "🌒",
+      archetype: "The Seeker • Expansion, Growth, Struggle, Opportunity",
+      summary: "push past resistance to build momentum",
+      desc: "The Crescent Moon emerges like a tender sprout breaking through soil—delicate yet determined. After the stillness of the New Moon, this phase signals the first outward movements toward growth and expansion. There is often a sense of friction here, as early intentions meet the resistance of the outside world. Challenges appear not as dead ends, but as tests of emerging strength. This is a phase of courage that urges you to act on faith and embrace opportunity even in uncertainty."
+    },
+    {
+      name: "First Quarter",
+      icon: "🌓",
+      archetype: "The Builder • Action, Decision, Friction, Momentum",
+      summary: "turn vision into decisive action",
+      desc: "The First Quarter Moon stands at a dynamic turning point where vision must become concrete action. If you were born under this phase, you are wired to build, problem-solve, and push through resistance. You often thrive in moments of pressure or crisis because decisive movement gives you clarity. Your life lesson centers on channeling your strong willpower constructively, building new structures without tearing down what still works."
+    },
+    {
+      name: "Waxing Gibbous",
+      icon: "🌔",
+      archetype: "The Refiner • Refinement, Analysis, Devotion, Preparation",
+      summary: "analyze, improve, and prepare for breakthroughs",
+      desc: "Just shy of full illumination, the Waxing Gibbous Moon is dedicated to perfecting, analyzing, and elevating what has already been built. You possess a naturally inquisitive and self-aware mind that constantly asks how things can work better. You are drawn to mastery, meaningful contribution, and helping others improve their lives. Your growth comes from balancing your high standards with self-compassion, trusting that you do not need to be flawless to be ready."
+    },
+    {
+      name: "Full Moon",
+      icon: "🌕",
+      archetype: "The Transformer • Illumination, Relationship, Culmination, Awareness",
+      summary: "bring clarity and balance to relationships",
+      desc: "Born at the peak of solar-lunar opposition, Full Moon individuals experience life through heightened awareness, emotional intensity, and relationship dynamics. You often act as a mirror for others, bringing hidden truths and unspoken feelings into the open. Life frequently asks you to find harmony between opposing forces, such as personal independence and deep partnership. Your gift lies in turning emotional tension into clarity, creativity, and conscious connection."
+    },
+    {
+      name: "Waning Gibbous",
+      icon: "🌖",
+      archetype: "The Mentor • Sharing, Teaching, Meaning, Integration",
+      summary: "integrate lived wisdom and share it with others",
+      desc: "As the Moon begins to release its light back to the world, the Waning Gibbous phase focuses on distributing wisdom and lived experience. You are naturally driven to make sense of what you have learned and share those insights with your community. Whether through teaching, storytelling, or mentorship, you feel most alive when your ideas spark growth in others. Your challenge is to share your truth openly while remaining receptive to differing viewpoints."
+    },
+    {
+      name: "Third Quarter",
+      icon: "🌗",
+      archetype: "The Releaser • Reorientation, Release, Transition, Inner Truth",
+      summary: "let go of outdated structures and reorient",
+      desc: "The Third Quarter Moon marks a pivotal inward turn, where outward structures begin to dissolve to make room for future renewal. People born here often feel slightly ahead of their time, questioning outdated traditions and seeking deeper personal meaning. You possess a quiet resilience when navigating endings and life transitions. Your path involves letting go of what no longer serves your spirit without becoming cynical or detached."
+    },
+    {
+      name: "Balsamic Moon",
+      icon: "🌘",
+      archetype: "The Healer • Surrender, Intuition, Closure, Vision",
+      summary: "bring closure to cycles and sense what lies ahead",
+      desc: "The Balsamic Moon rests in the quiet twilight just before a new cycle begins. Born in this deeply reflective phase, you carry an empathetic, contemplative, and often prophetic sensibility. You naturally sense the undercurrents of a room and are drawn to healing, closure, and spiritual depth. Because you absorb so much from your environment, regular solitude and rest are essential for recharging your energy and honoring your intuition."
+    }
   ];
 
   const signs = [
-    { name: "Aries Moon", icon: "♈", element: "Fire Sign • Instinctual & Direct", need: "independence and movement", desc: "You process emotions quickly and honestly. You feel best when you have independence, physical movement, and freedom to act." },
-    { name: "Taurus Moon", icon: "♉", element: "Earth Sign • Grounded & Steady", need: "stability and comfort", desc: "You seek stability, sensory comfort, and calm. You feel safest with predictable routines, good food, and peaceful surroundings." },
-    { name: "Gemini Moon", icon: "♊", element: "Air Sign • Curious & Expressive", need: "mental stimulation and dialogue", desc: "You process feelings through talking, writing, and analyzing. You need mental variety and open conversation to feel balanced." },
-    { name: "Cancer Moon", icon: "♋", element: "Water Sign • Nurturing & Intuitive", need: "emotional safety and home", desc: "Deeply empathetic, protective, and intuitive. You feel most secure when nurturing loved ones and tending to your home sanctuary." },
-    { name: "Leo Moon", icon: "♌", element: "Fire Sign • Warm & Heartfelt", need: "creative expression and warmth", desc: "Warm, expressive, and fiercely loyal. You need creative outlets, appreciation, and heartfelt connection to feel emotionally fulfilled." },
-    { name: "Virgo Moon", icon: "♍", element: "Earth Sign • Practical & Thoughtful", need: "order and usefulness", desc: "You show care through practical help and problem-solving. You feel calmest when life is orderly and daily routines flow smoothly." },
-    { name: "Libra Moon", icon: "♎", element: "Air Sign • Harmonious & Relational", need: "harmony and partnership", desc: "You crave harmony, fairness, and beauty. You process emotions best through balanced dialogue and peaceful environments." },
-    { name: "Scorpio Moon", icon: "♏", element: "Water Sign • Deep & Transformative", need: "deep trust and privacy", desc: "You experience emotions deeply and intensely. You value loyalty, privacy, and transformative, soul-level connections." },
-    { name: "Sagittarius Moon", icon: "♐", element: "Fire Sign • Optimistic & Free-Spirited", need: "freedom and exploration", desc: "Optimistic, adventurous, and freedom-loving. You need space to explore, learn, and find meaning when processing stress." },
-    { name: "Capricorn Moon", icon: "♑", element: "Earth Sign • Resilient & Composed", need: "clear boundaries and structure", desc: "Grounded, resilient, and self-reliant. You feel most secure when setting clear boundaries and working toward long-term goals." },
-    { name: "Aquarius Moon", icon: "♒", element: "Air Sign • Independent & Observant", need: "intellectual freedom", desc: "Observant, independent, and community-minded. You need intellectual freedom and objective perspective when navigating heavy feelings." },
-    { name: "Pisces Moon", icon: "♓", element: "Water Sign • Gentle & Imaginative", need: "quiet time and creative rest", desc: "Gentle, imaginative, and highly sensitive to the moods of others. You need quiet time, music, or creative rest to recharge." }
+    {
+      name: "Moon in Aries",
+      icon: "♈",
+      element: "Fire Sign • Instinctual & Direct",
+      need: "autonomy, honesty, and immediate movement",
+      desc: "Your emotional safety relies on autonomy, honesty, and immediate movement. You process feelings in quick, fiery bursts and recover fastest when you can take direct action. Your lesson is learning to pause and sit with vulnerability rather than rushing past uncomfortable emotions."
+    },
+    {
+      name: "Moon in Taurus",
+      icon: "♉",
+      element: "Earth Sign • Grounded & Steady",
+      need: "stability, sensory comfort, and predictability",
+      desc: "Your safety depends on stability, sensory comfort, and predictability. You have a grounded, practical nature that finds peace through steady routines and tangible security. Your growth comes from accepting that change is a natural part of life so unexpected shifts do not shake your inner calm."
+    },
+    {
+      name: "Moon in Gemini",
+      icon: "♊",
+      element: "Air Sign • Curious & Expressive",
+      need: "open dialogue and mental stimulation",
+      desc: "You feel safest when you can name, question, and talk through what you are experiencing. A curious mind and open dialogue keep your nervous system regulated. Your lesson is allowing yourself to actually feel heavy emotions rather than immediately analyzing or intellectualizing them away."
+    },
+    {
+      name: "Moon in Cancer",
+      icon: "♋",
+      element: "Water Sign • Nurturing & Intuitive",
+      need: "home, belonging, and trusted bonds",
+      desc: "Deeply intuitive and protective, your emotional security is tied to home, belonging, and trusted bonds. You naturally sense the needs of others and offer heartfelt care. Your growth involves setting healthy emotional boundaries so you do not absorb everyone else's moods."
+    },
+    {
+      name: "Moon in Leo",
+      icon: "♌",
+      element: "Fire Sign • Warm & Heartfelt",
+      need: "warmth, creative expression, and genuine appreciation",
+      desc: "Your emotional well-being thrives on warmth, creative expression, and genuine appreciation. You are fiercely loyal and generous with your heart when you feel seen and valued. Your lesson is cultivating steady self-validation from within rather than relying entirely on external applause."
+    },
+    {
+      name: "Moon in Virgo",
+      icon: "♍",
+      element: "Earth Sign • Practical & Thoughtful",
+      need: "order, usefulness, and thoughtful preparation",
+      desc: "You find emotional calm through order, usefulness, and thoughtful preparation. Showing care through practical acts of service is your natural love language. Your growth comes from releasing perfectionism and recognizing that you are worthy of care even when things feel messy."
+    },
+    {
+      name: "Moon in Libra",
+      icon: "♎",
+      element: "Air Sign • Harmonious & Relational",
+      need: "harmony, fairness, and mutual understanding",
+      desc: "Emotional balance for you is closely linked to harmony, fairness, and mutual understanding. You instinctively seek peace in your environment and process feelings best through calm conversation. Your lesson is honoring your own true needs even when doing so risks temporary disagreement."
+    },
+    {
+      name: "Moon in Scorpio",
+      icon: "♏",
+      element: "Water Sign • Deep & Transformative",
+      need: "complete trust, privacy, and authentic connection",
+      desc: "You experience the emotional world with uncommon depth, intensity, and perception. Safety for you requires complete trust, privacy, and authentic connection. Your growth lies in learning to release control and allow trusted people in without fearing betrayal."
+    },
+    {
+      name: "Moon in Sagittarius",
+      icon: "♐",
+      element: "Fire Sign • Optimistic & Free-Spirited",
+      need: "optimism, freedom, and the bigger picture",
+      desc: "Your emotional resilience comes from optimism, freedom, and searching for the bigger picture. When stressed, you need open space, movement, or a fresh perspective to breathe. Your lesson is staying present during difficult emotional moments rather than escaping into the next adventure."
+    },
+    {
+      name: "Moon in Capricorn",
+      icon: "♑",
+      element: "Earth Sign • Resilient & Composed",
+      need: "clear boundaries, structure, and purpose",
+      desc: "Self-reliant and composed, you feel safest when you have clear boundaries, structure, and a sense of purpose. You often take on responsibility early and process feelings privately. Your growth comes from allowing yourself to lean on others and express tenderness without feeling weak."
+    },
+    {
+      name: "Moon in Aquarius",
+      icon: "♒",
+      element: "Air Sign • Independent & Observant",
+      need: "independence, objectivity, and intellectual space",
+      desc: "You seek emotional equilibrium through independence, objectivity, and intellectual space. Observing your feelings from a slight distance helps you stay steady during chaos. Your lesson is bridging your bright, analytical mind with warm, immediate human intimacy."
+    },
+    {
+      name: "Moon in Pisces",
+      icon: "♓",
+      element: "Water Sign • Gentle & Imaginative",
+      need: "quiet time, music, or creative rest",
+      desc: "Boundless, imaginative, and deeply empathetic, you absorb the emotional atmosphere around you like a sponge. Quiet time, music, water, or creative rest are vital for your grounding. Your growth involves anchoring your rich inner world in gentle daily routines so you do not feel overwhelmed."
+    }
   ];
 
-    function calculateMoon() {
+  function calculateMoon() {
     const dateVal = document.getElementById("bday").value;
     if (!dateVal) return;
 
@@ -165,26 +311,36 @@
     const targetUTC = Date.UTC(year, month - 1, day, hour, minute, 0);
     const jd = (targetUTC / 86400000) + 2440587.5;
     const d = jd - 2451545.0;
-
-    const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14, 0);
-    const synodicMonth = 29.530588853;
-    const daysSinceNew = (targetUTC - knownNewMoon) / 86400000;
-    let cycleFraction = (daysSinceNew / synodicMonth) % 1;
-    if (cycleFraction < 0) cycleFraction += 1;
-    const phaseIndex = Math.floor((cycleFraction * 8) + 0.5) % 8;
-    const phase = phases[phaseIndex];
-
     const rad = Math.PI / 180;
+
+    // 1. Sun Ecliptic Longitude
+    const gSun = (357.529 + 0.98560028 * d) % 360;
+    const qSun = (280.459 + 0.98564736 * d) % 360;
+    let sunLon = qSun + 1.915 * Math.sin(gSun * rad) + 0.020 * Math.sin(2 * gSun * rad);
+    sunLon = ((sunLon % 360) + 360) % 360;
+
+    // 2. Moon Ecliptic Longitude
     const L = (218.316 + 13.176396 * d) % 360;
     const M = (134.963 + 13.064993 * d) % 360;
     const F = (93.272 + 13.229350 * d) % 360;
-    let lon = L + 6.289 * Math.sin(M * rad) - 1.274 * Math.sin((M - 2 * F) * rad) + 0.658 * Math.sin(2 * F * rad);
-    lon = ((lon % 360) + 360) % 360;
-    const signIndex = Math.floor(lon / 30);
+    let moonLon = L + 6.289 * Math.sin(M * rad) - 1.274 * Math.sin((M - 2 * F) * rad) + 0.658 * Math.sin(2 * F * rad);
+    moonLon = ((moonLon % 360) + 360) % 360;
+
+    // 3. Exact Phase Angle (0° to 360°) & Centered 8-Phase Index
+    let phaseAngle = ((moonLon - sunLon) % 360 + 360) % 360;
+    const deg = Math.floor(phaseAngle);
+    const min = Math.floor((phaseAngle - deg) * 60);
+    const phaseIndex = Math.floor(((phaseAngle + 22.5) % 360) / 45) % 8;
+    const phase = phases[phaseIndex];
+
+    // 4. Zodiac Moon Sign
+    const signIndex = Math.floor(moonLon / 30);
     const sign = signs[signIndex];
 
+    // Update UI
     document.getElementById("moonIcon").textContent = phase.icon;
     document.getElementById("phaseTitle").textContent = phase.name;
+    document.getElementById("phaseDegree").textContent = `${deg}° ${min.toString().padStart(2, '0')}' Moon Phase Angle`;
     document.getElementById("archetype").textContent = phase.archetype;
     document.getElementById("phaseDesc").textContent = phase.desc;
 
@@ -194,7 +350,7 @@
     document.getElementById("signDesc").textContent = sign.desc;
 
     document.getElementById("comboSummary").innerHTML = 
-      `<strong>Your Lunar Blend:</strong> As a <strong>${phase.archetype}</strong> (${phase.name}) with a <strong>${sign.name}</strong>, you naturally <em>${phase.summary}</em> while needing <em>${sign.need}</em> to feel grounded.`;
+      `<strong>Your Lunar Blend:</strong> Born under a <strong>${phase.name}</strong> with your <strong>${sign.name}</strong>, you naturally <em>${phase.summary}</em> while needing <em>${sign.need}</em> to feel grounded.`;
 
     document.getElementById("result").style.display = "block";
     document.getElementById("copyBtn").textContent = "Copy My Results";
@@ -202,9 +358,9 @@
 
   function copyResult() {
     const phase = document.getElementById("phaseTitle").textContent;
-    const arch = document.getElementById("archetype").textContent;
+    const deg = document.getElementById("phaseDegree").textContent;
     const sign = document.getElementById("signTitle").textContent;
-    const text = `My Birth Moon Profile: ${phase} (${arch}) & ${sign}!`;
+    const text = `My Birth Moon Profile: ${phase} (${deg}) & ${sign}!`;
     navigator.clipboard.writeText(text);
     document.getElementById("copyBtn").textContent = "Copied to Clipboard!";
   }
