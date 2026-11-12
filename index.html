@@ -326,11 +326,11 @@
     let moonLon = L + 6.289 * Math.sin(M * rad) - 1.274 * Math.sin((M - 2 * F) * rad) + 0.658 * Math.sin(2 * F * rad);
     moonLon = ((moonLon % 360) + 360) % 360;
 
-    // 3. Exact Phase Angle (0° to 360°) & Centered 8-Phase Index
+    // 3. Exact Phase Angle (0° to 360°) & Astrological 8-Phase Index (45° brackets starting at 0°)
     let phaseAngle = ((moonLon - sunLon) % 360 + 360) % 360;
     const deg = Math.floor(phaseAngle);
     const min = Math.floor((phaseAngle - deg) * 60);
-    const phaseIndex = Math.floor(((phaseAngle + 22.5) % 360) / 45) % 8;
+    const phaseIndex = Math.floor(phaseAngle / 45) % 8;
     const phase = phases[phaseIndex];
 
     // 4. Zodiac Moon Sign
