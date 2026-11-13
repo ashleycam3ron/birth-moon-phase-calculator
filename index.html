@@ -18,7 +18,7 @@
     }
     .card {
       background: #1e293b;
-      padding: 2rem 1rem;
+      padding: 2rem;
       border-radius: 16px;
       max-width: 560px;
       width: 100%;
@@ -83,7 +83,7 @@
       border: 1px solid #334155;
     }
     .tag { font-size: 0.88rem; color: #cbd5e1; font-style: italic; margin-top: 4px; }
-    .description { font-size: 0.94rem; line-height: 1.6; color: #e2e8f0; margin: 0;text-align: center;}
+    .description { font-size: 0.94rem; line-height: 1.6; color: #e2e8f0; margin: 0; text-align:center;}
     .combo-box {
       background: #312e81;
       padding: 1.1rem;
@@ -300,6 +300,17 @@
     }
   ];
 
+  function getCalendarPhaseIndex(angle) {
+    if (angle >= 354 || angle < 6) return 0;   // New Moon
+    if (angle >= 6 && angle < 84) return 1;     // Waxing Crescent
+    if (angle >= 84 && angle < 96) return 2;    // First Quarter
+    if (angle >= 96 && angle < 174) return 3;   // Waxing Gibbous
+    if (angle >= 174 && angle < 186) return 4;  // Full Moon
+    if (angle >= 186 && angle < 264) return 5;  // Waning Gibbous
+    if (angle >= 264 && angle < 276) return 6;  // Third Quarter
+    return 7;                                   // Balsamic Moon (276 to 354)
+  }
+
   function calculateMoon() {
     const dateVal = document.getElementById("bday").value;
     if (!dateVal) return;
@@ -308,8 +319,9 @@
     const [year, month, day] = dateVal.split("-").map(Number);
     const [hour, minute] = timeVal.split(":").map(Number);
 
-    const targetUTC = Date.UTC(year, month - 1, day, hour, minute, 0);
-    const jd = (targetUTC / 86400000) + 2440587.5;
+    // Use local browser date/time so entered birth time matches user's local clock
+    const localDate = new Date(year, month - 1, day, hour, minute, 0);
+    const jd = (localDate.getTime() / 86400000) + 2440587.5;
     const d = jd - 2451545.0;
     const rad = Math.PI / 180;
 
@@ -326,11 +338,11 @@
     let moonLon = L + 6.289 * Math.sin(M * rad) - 1.274 * Math.sin((M - 2 * F) * rad) + 0.658 * Math.sin(2 * F * rad);
     moonLon = ((moonLon % 360) + 360) % 360;
 
-    // 3. Exact Phase Angle (0° to 360°) & Astrological 8-Phase Index (45° brackets starting at 0°)
+    // 3. Exact Phase Angle (0° to 360°) & Calendar-Accurate Phase Index
     let phaseAngle = ((moonLon - sunLon) % 360 + 360) % 360;
     const deg = Math.floor(phaseAngle);
     const min = Math.floor((phaseAngle - deg) * 60);
-    const phaseIndex = Math.floor(phaseAngle / 45) % 8;
+    const phaseIndex = getCalendarPhaseIndex(phaseAngle);
     const phase = phases[phaseIndex];
 
     // 4. Zodiac Moon Sign
